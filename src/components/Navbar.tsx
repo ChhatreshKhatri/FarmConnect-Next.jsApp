@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -29,8 +30,9 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold">
-                FarmConnect
+              <Link href="/" className="flex items-center space-x-2 text-xl font-bold">
+                <Image src="https://cdn.chhatreshkhatri.com/icons/FarmConnect.svg" alt="FarmConnect" width={32} height={32} className="w-8 h-8" />
+                <span>FarmConnect</span>
               </Link>
             </div>
             <div className="flex items-center">
@@ -44,11 +46,13 @@ const Navbar = () => {
 
   return (
     <nav className="bg-blue-600 text-white shadow-lg">
+      {" "}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold">
-              FarmConnect
+            <Link href="/" className="flex items-center space-x-2 text-xl font-bold">
+              <Image src="https://cdn.chhatreshkhatri.com/icons/FarmConnect.svg" alt="FarmConnect" width={32} height={32} className="w-8 h-8" />
+              <span>FarmConnect</span>
             </Link>
           </div>
 

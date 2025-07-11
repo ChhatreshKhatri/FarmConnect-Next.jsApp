@@ -38,6 +38,16 @@ A comprehensive farm management platform built with Next.js, TypeScript, and Tai
 - **Authentication**: JWT tokens with localStorage
 - **File Handling**: Browser FileReader API for base64 conversion
 
+## Architecture
+
+FarmConnect follows a modern microservices architecture:
+
+- **Frontend**: This Next.js application (React-based web interface)
+- **Backend**: [FarmConnect-WebApi](https://github.com/ChhatreshKhatri/FarmConnect-WebApi) (RESTful API service)
+- **Database**: SQL Server (managed by the backend API)
+- **Authentication**: JWT-based auth system
+- **Image**: Base64 encoding for image storage
+
 ## Getting Started
 
 First, install dependencies:
@@ -69,8 +79,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Create a `.env.local` file in the root directory with your environment variables:
 
 ```env
-# Add your environment variables here
+# Backend API URL - Points to the FarmConnect WebAPI service
+NEXT_PUBLIC_API_URL=https://your-backend-api-url.com
 ```
+
+**Note**: This frontend application requires the [FarmConnect-WebApi](https://github.com/ChhatreshKhatri/FarmConnect-WebApi) backend service to be running. Make sure to set up and deploy the backend API first, then configure the `NEXT_PUBLIC_API_URL` to point to your API endpoint.
 
 ## Project Structure
 
@@ -109,6 +122,12 @@ src/
 - **Supplier**: Access to medicine management, feed management, request handling, and feedback viewing
 
 ## Learn More
+
+### Related Repositories
+
+- **Backend API**: [FarmConnect-WebApi](https://github.com/ChhatreshKhatri/FarmConnect-WebApi) - The backend API service that powers this frontend application
+
+### Documentation
 
 To learn more about the technologies used:
 
