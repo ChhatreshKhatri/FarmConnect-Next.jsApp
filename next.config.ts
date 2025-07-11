@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',  // Enable static export for Cloudflare Pages
-  trailingSlash: true,  // Recommended for static hosting
+  trailingSlash: true,
   images: {
-    unoptimized: true  // Required for static export
-  }
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;

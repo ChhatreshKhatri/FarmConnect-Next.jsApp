@@ -45,6 +45,16 @@ export default function CreateMedicine() {
         throw new Error("User ID not found");
       }
 
+      // Validate quantity
+      if (medicine.Quantity <= 0) {
+        throw new Error("Quantity must be greater than 0");
+      }
+
+      // Validate price
+      if (medicine.PricePerUnit <= 0) {
+        throw new Error("Price must be greater than 0");
+      }
+
       const medicineData = {
         MedicineId: 0, // Will be set by the server
         ...medicine,
@@ -180,7 +190,7 @@ export default function CreateMedicine() {
               <label htmlFor="Quantity" className="block text-sm font-medium text-gray-700 mb-2">
                 Quantity *
               </label>
-              <input type="number" id="Quantity" name="Quantity" value={medicine.Quantity} onChange={handleInputChange} required min="0" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" />
+              <input type="number" id="Quantity" name="Quantity" value={medicine.Quantity} onChange={handleInputChange} required min="1" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1" />
             </div>
 
             <div className="md:col-span-2">
@@ -219,8 +229,8 @@ export default function CreateMedicine() {
           </div>
 
           <div className="mt-6 flex space-x-4">
-            <button type="submit" disabled={loading} className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? "Creating..." : "Create Medicine"}
+            <button type="submit" disabled={loading || medicine.Quantity <= 0 || medicine.PricePerUnit <= 0} className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              {loading ? "Creating..." : medicine.Quantity <= 0 ? "Enter Valid Quantity" : medicine.PricePerUnit <= 0 ? "Enter Valid Price" : "Create Medicine"}
             </button>
             <button type="button" onClick={() => router.push("/supplier/medicine")} className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
               Cancel

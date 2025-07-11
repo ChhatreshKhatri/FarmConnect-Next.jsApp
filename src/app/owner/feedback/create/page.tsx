@@ -11,7 +11,7 @@ export default function CreateFeedback() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const { userId } = useAuth();
+  const { userId, userRole, isAuthenticated } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,6 +43,18 @@ export default function CreateFeedback() {
       setLoading(false);
     }
   };
+
+  // Redirect if not authenticated or not an owner
+  if (!isAuthenticated || (userRole && userRole !== "Owner")) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
+          <p className="text-gray-600">You don&apos;t have permission to access this page.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-2xl">

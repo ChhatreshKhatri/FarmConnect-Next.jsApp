@@ -98,7 +98,12 @@ export default function RequestForm() {
       }
 
       if (request.Quantity <= 0) {
-        throw new Error("Please enter a valid quantity");
+        throw new Error("Quantity must be greater than 0");
+      }
+
+      // Check if requested quantity exceeds available quantity
+      if (item && request.Quantity > item.Quantity) {
+        throw new Error(`Requested quantity (${request.Quantity}) exceeds available quantity (${item.Quantity})`);
       }
 
       const requestData = {
@@ -274,6 +279,12 @@ export default function RequestForm() {
                 placeholder="Enter quantity"
               />
               {item && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Available: <span className="font-semibold text-green-600">{item.Quantity}</span> {(item as Medicine).Unit || (item as Feed).Unit}
+                  {item.Quantity === 0 && <span className="text-red-600 font-semibold ml-2">🚫 Out of Stock</span>}
+                </p>
+              )}
+              {item && (
                 <p className="text-sm text-gray-500 mt-1">
                   Available: {item.Quantity} {item.Unit} | Total Cost: ${(request.Quantity * item.PricePerUnit).toFixed(2)}
                 </p>
@@ -311,8 +322,11 @@ export default function RequestForm() {
           </div>
 
           <div className="mt-6 flex space-x-4">
-            <button type="submit" disabled={loading || myLivestock.length === 0} className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? "Submitting..." : "Submit Request"}
+            <button
+              type="submit"
+              disabled={loading || myLivestock.length === 0 || !item || item.Quantity === 0 || request.Quantity <= 0 || request.Quantity > item.Quantity}
+              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              {loading ? "Submitting..." : !item || item.Quantity === 0 ? "Out of Stock" : request.Quantity <= 0 ? "Enter Valid Quantity" : request.Quantity > item.Quantity ? "Exceeds Available" : "Submit Request"}
             </button>
             <button type="button" onClick={() => router.back()} className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
               Cancel

@@ -18,8 +18,13 @@ export function withAuth<T extends object>(WrappedComponent: React.ComponentType
     useEffect(() => {
       if (!loading) {
         if (!isAuthenticated) {
-          router.push("/login");
-          return;
+          // Use a delay to avoid conflicts with other redirect mechanisms
+          const redirectTimer = setTimeout(() => {
+            if (!isAuthenticated && typeof window !== "undefined" && window.location.pathname !== "/login") {
+              router.push("/login");
+            }
+          }, 100);
+          return () => clearTimeout(redirectTimer);
         }
 
         if (requiredRole && userRole !== requiredRole) {

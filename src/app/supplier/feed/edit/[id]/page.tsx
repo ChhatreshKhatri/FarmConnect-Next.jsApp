@@ -80,6 +80,16 @@ export default function EditFeed({ params }: EditFeedProps) {
         throw new Error("Invalid feed or user data");
       }
 
+      // Validate quantity
+      if (feed.Quantity <= 0) {
+        throw new Error("Quantity must be greater than 0");
+      }
+
+      // Validate price
+      if (feed.PricePerUnit <= 0) {
+        throw new Error("Price must be greater than 0");
+      }
+
       await feedService.updateFeed(feed.FeedId, feed);
       setSuccess(true);
 
@@ -180,7 +190,7 @@ export default function EditFeed({ params }: EditFeedProps) {
               <label htmlFor="Quantity" className="block text-sm font-medium text-gray-700 mb-2">
                 Quantity *
               </label>
-              <input type="number" id="Quantity" name="Quantity" value={feed.Quantity} onChange={handleInputChange} required min="0" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" />
+              <input type="number" id="Quantity" name="Quantity" value={feed.Quantity} onChange={handleInputChange} required min="1" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1" />
             </div>
 
             <div>
@@ -219,8 +229,8 @@ export default function EditFeed({ params }: EditFeedProps) {
           </div>
 
           <div className="mt-6 flex space-x-4">
-            <button type="submit" disabled={saving} className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-              {saving ? "Updating..." : "Update Feed"}
+            <button type="submit" disabled={saving || feed.Quantity <= 0 || feed.PricePerUnit <= 0} className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              {saving ? "Updating..." : feed.Quantity <= 0 ? "Enter Valid Quantity" : feed.PricePerUnit <= 0 ? "Enter Valid Price" : "Update Feed"}
             </button>
             <button type="button" onClick={() => router.push("/supplier/feed")} className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600">
               Cancel

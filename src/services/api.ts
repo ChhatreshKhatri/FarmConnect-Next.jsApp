@@ -38,9 +38,16 @@ class ApiService {
       localStorage.removeItem("token");
       document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
-      // Only redirect if not already on login/register/home pages
-      if (window.location.pathname !== "/login" && window.location.pathname !== "/register" && window.location.pathname !== "/") {
-        window.location.href = "/login";
+      // Only redirect if not already on login/register/home pages and not in a redirect loop
+      const currentPath = window.location.pathname;
+      const isPublicPage = currentPath === "/login" || currentPath === "/register" || currentPath === "/";
+
+      if (!isPublicPage && !sessionStorage.getItem("redirecting")) {
+        sessionStorage.setItem("redirecting", "true");
+        setTimeout(() => {
+          sessionStorage.removeItem("redirecting");
+          window.location.href = "/login";
+        }, 100);
       }
     }
   }

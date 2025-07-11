@@ -10,7 +10,7 @@ export default function OwnerFeedback() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { userId, loading: authLoading } = useAuth();
+  const { userId, userRole, isAuthenticated, loading: authLoading } = useAuth();
 
   const loadFeedbacks = useCallback(async () => {
     try {
@@ -38,6 +38,18 @@ export default function OwnerFeedback() {
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
         <span className="ml-4 text-gray-600">Loading authentication...</span>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated or not an owner
+  if (!isAuthenticated || (userRole && userRole !== "Owner")) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
+          <p className="text-gray-600">You don&apos;t have permission to access this page.</p>
+        </div>
       </div>
     );
   }

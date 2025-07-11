@@ -40,11 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserRole(null);
       setUserId(null);
       setUsername(null);
-
-      // If we were previously authenticated but now we're not (token expired), redirect to login
-      if (typeof window !== "undefined" && window.location.pathname !== "/login" && window.location.pathname !== "/register" && window.location.pathname !== "/") {
-        window.location.href = "/login";
-      }
     }
 
     setLoading(false);

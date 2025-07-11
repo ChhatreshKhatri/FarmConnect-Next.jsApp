@@ -1,14 +1,14 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { feedService } from "@/services/feed";
 import { Feed } from "@/types";
 import Link from "next/link";
-import ImageDisplay from "@/components/ImageDisplay";
+import Image from "next/image";
 
 export default function OwnerFeed() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, userRole, loading: authLoading } = useAuth();
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,7 +34,6 @@ export default function OwnerFeed() {
     }
   }, [authLoading, isAuthenticated, loadFeeds]);
 
-  // Show loading while auth is loading
   if (authLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -46,13 +45,12 @@ export default function OwnerFeed() {
     );
   }
 
-  // Show access denied if not authenticated
-  if (!isAuthenticated) {
+  if (!isAuthenticated || userRole !== "Owner") {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
-          <p className="text-gray-600 mb-4">Please log in to browse feeds.</p>
+          <p className="text-gray-600 mb-4">This page is only accessible to livestock owners.</p>
           <Link href="/login" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Go to Login
           </Link>
@@ -88,7 +86,7 @@ export default function OwnerFeed() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {feeds.map((feed) => (
             <div key={feed.FeedId} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <ImageDisplay src={feed.Image} alt={feed.FeedName} className="w-full h-48 object-cover" fallbackText="No feed image" />
+              {feed.Image && <Image src={feed.Image} alt={feed.FeedName} width={400} height={192} className="w-full h-48 object-cover" />}
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{feed.FeedName}</h3>
                 <p className="text-gray-600 mb-2">Type: {feed.Type}</p>
@@ -107,7 +105,7 @@ export default function OwnerFeed() {
                 <Link href={`/owner/request/feed/${feed.FeedId}`} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-200 text-center block">
                   Request Feed
                 </Link>
-              </div>{" "}
+              </div>
             </div>
           ))}
         </div>
