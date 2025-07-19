@@ -10,7 +10,7 @@ export class RequestService {
     return apiService.get<Request>(`/api/request/${id}`);
   }
 
-  async getRequestsByUserId(userId: number): Promise<Request[]> {
+  async getRequestsByUserId(userId: string): Promise<Request[]> {
     try {
       return await apiService.get<Request[]>(`/api/request/user/${userId}`);
     } catch (error) {

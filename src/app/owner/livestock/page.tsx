@@ -13,43 +13,26 @@ export default function OwnerLivestock() {
   const [error, setError] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  console.log("OwnerLivestock render:", { userId, userRole, authLoading, loading });
-
   const loadLivestock = useCallback(async () => {
-    console.log("loadLivestock called with userId:", userId);
     try {
       setLoading(true);
       if (userId) {
-        console.log("Fetching livestock for user:", userId);
         const data = await livestockService.getLivestockByUserId(userId);
-        console.log("Livestock data received:", data);
         setLivestock(data);
-      } else {
-        console.log("No userId available, skipping livestock fetch");
       }
     } catch (err) {
       console.error("Error loading livestock:", err);
       setError(err instanceof Error ? err.message : "Failed to load livestock");
     } finally {
-      console.log("Setting loading to false");
       setLoading(false);
     }
   }, [userId]);
 
   useEffect(() => {
-    console.log("useEffect triggered with:", { userId, userRole, authLoading });
     if (!authLoading) {
       if (userId && userRole === "Owner") {
-        console.log("Conditions met, calling loadLivestock");
         loadLivestock();
       } else {
-        console.log("Conditions not met for loading livestock");
-        if (userRole && userRole !== "Owner") {
-          console.log("User role is not Owner:", userRole);
-        }
-        if (!userId) {
-          console.log("No userId available");
-        }
         // If auth is done loading but conditions aren't met, stop loading
         setLoading(false);
       }
@@ -60,7 +43,6 @@ export default function OwnerLivestock() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading) {
-        console.log("Loading timeout - setting loading to false");
         setLoading(false);
         setError("Loading timeout - please try refreshing the page");
       }

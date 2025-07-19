@@ -1,6 +1,13 @@
 import { apiService } from "./api";
 import { Medicine } from "@/types";
 
+interface RequestData {
+  MedicineId?: number;
+  FeedId?: number;
+  Status: string;
+  Quantity: number;
+}
+
 export class MedicineService {
   async getAllMedicines(): Promise<Medicine[]> {
     return apiService.get<Medicine[]>("/api/medicine");
@@ -10,7 +17,7 @@ export class MedicineService {
     return apiService.get<Medicine>(`/api/medicine/${id}`);
   }
 
-  async getMedicinesByUserId(userId: number): Promise<Medicine[]> {
+  async getMedicinesByUserId(userId: string): Promise<Medicine[]> {
     try {
       return await apiService.get<Medicine[]>(`/api/medicine/user/${userId}`);
     } catch (error) {
@@ -33,6 +40,20 @@ export class MedicineService {
 
   async deleteMedicine(id: number): Promise<string> {
     return apiService.delete<string>(`/api/medicine/${id}`);
+  }
+
+  async getTotalSoldByMedicineId(medicineId: number): Promise<number> {
+    try {
+      // Get all requests for this medicine that are approved
+      const allRequests = await apiService.get<RequestData[]>("/api/request");
+      const approvedRequests = allRequests.filter((request) => request.MedicineId === medicineId && request.Status === "Approved");
+
+      // Sum up the quantities
+      return approvedRequests.reduce((total, request) => total + request.Quantity, 0);
+    } catch (error) {
+      console.error("Failed to calculate total sold:", error);
+      return 0;
+    }
   }
 }
 

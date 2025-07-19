@@ -44,6 +44,7 @@ class ApiService {
 
       if (!isPublicPage && !sessionStorage.getItem("redirecting")) {
         sessionStorage.setItem("redirecting", "true");
+
         setTimeout(() => {
           sessionStorage.removeItem("redirecting");
           window.location.href = "/login";

@@ -31,7 +31,7 @@ export default function EditMedicine({ params }: EditMedicineProps) {
     Unit: "",
     PricePerUnit: 0,
     Image: "",
-    UserId: userId || 0,
+    UserId: userId || "",
   });
 
   // Get the medicine ID from params

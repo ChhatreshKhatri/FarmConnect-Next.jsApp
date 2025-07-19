@@ -29,7 +29,7 @@ export default function RequestForm() {
     RequestType: type === "medicine" ? "Medicine" : "Feed",
     MedicineId: type === "medicine" ? itemId : null,
     FeedId: type === "feed" ? itemId : null,
-    UserId: userId || 0,
+    UserId: userId || "",
     Quantity: 1,
     Status: "Pending",
     LivestockId: 0, // Will be set when livestock loads
@@ -295,7 +295,7 @@ export default function RequestForm() {
               <label htmlFor="RequestDate" className="block text-sm font-medium text-gray-700 mb-2">
                 Request Date *
               </label>
-              <input type="date" id="RequestDate" name="RequestDate" value={request.RequestDate} onChange={handleInputChange} required className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="date" id="RequestDate" name="RequestDate" value={request.RequestDate} onChange={handleInputChange} required disabled className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 cursor-not-allowed" />
             </div>
 
             {/* Summary */}

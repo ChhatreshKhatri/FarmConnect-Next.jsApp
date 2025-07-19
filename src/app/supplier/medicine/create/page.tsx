@@ -24,7 +24,7 @@ export default function CreateMedicine() {
     Unit: "",
     PricePerUnit: 0,
     Image: "",
-    UserId: userId || 0,
+    UserId: userId || "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

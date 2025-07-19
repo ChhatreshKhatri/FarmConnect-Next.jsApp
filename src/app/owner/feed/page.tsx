@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -99,12 +99,21 @@ export default function OwnerFeed() {
                   </div>
                   <div className="text-sm text-gray-600">
                     Available: {feed.Quantity} {feed.Unit}
+                    {feed.Quantity > 0 && <span className="ml-2 text-green-600">✅ In Stock</span>}
                   </div>
                 </div>
 
-                <Link href={`/owner/request/feed/${feed.FeedId}`} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-200 text-center block">
-                  Request Feed
-                </Link>
+                {feed.Quantity > 0 ? (
+                  <Link href={`/owner/request/feed/${feed.FeedId}`} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-200 text-center block">
+                    Request Feed
+                  </Link>
+                ) : (
+                  <div className="w-full text-center">
+                    <button disabled className="w-full bg-gray-400 text-white py-2 px-4 rounded cursor-not-allowed mb-2">
+                      🚫 Out of Stock
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

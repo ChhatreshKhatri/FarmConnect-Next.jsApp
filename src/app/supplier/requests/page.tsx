@@ -3,7 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { requestService } from "@/services/request";
-import { Request } from "@/types";
+import { medicineService } from "@/services/medicine";
+import { feedService } from "@/services/feed";
+import { Request, Medicine, Feed } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function SupplierRequests() {
@@ -11,6 +13,7 @@ export default function SupplierRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [processingRequest, setProcessingRequest] = useState<number | null>(null);
+  const [itemDetails, setItemDetails] = useState<{ [key: string]: Medicine | Feed }>({});
   const { userId, userRole, loading: authLoading } = useAuth();
 
   const loadRequests = useCallback(async () => {
@@ -23,9 +26,44 @@ export default function SupplierRequests() {
     try {
       setLoading(true);
       setError("");
-      // Get requests related to this supplier's medicines and feeds
-      const data = await requestService.getRequestsByUserId(userId);
-      setRequests(data);
+
+      // Get all requests, then filter for requests related to this supplier's items
+      const allRequests = await requestService.getAllRequests();
+
+      // Get supplier's medicines and feeds to filter requests
+      const [supplierMedicines, supplierFeeds] = await Promise.all([medicineService.getMedicinesByUserId(userId), feedService.getFeedsByUserId(userId)]);
+
+      // Get IDs of supplier's items
+      const supplierMedicineIds = supplierMedicines.map((med) => med.MedicineId);
+      const supplierFeedIds = supplierFeeds.map((feed) => feed.FeedId);
+
+      // Filter requests for supplier's items
+      const supplierRequests = allRequests.filter((request) => (request.MedicineId && supplierMedicineIds.includes(request.MedicineId)) || (request.FeedId && supplierFeedIds.includes(request.FeedId)));
+
+      // Sort by RequestDate in descending order (latest first)
+      const sortedRequests = supplierRequests.sort((a, b) => new Date(b.RequestDate).getTime() - new Date(a.RequestDate).getTime());
+
+      // Fetch item details for each request
+      const itemDetailsMap: { [key: string]: Medicine | Feed } = {};
+      await Promise.all(
+        sortedRequests.map(async (request) => {
+          try {
+            if (request.MedicineId) {
+              const medicine = await medicineService.getMedicineById(request.MedicineId);
+              itemDetailsMap[`medicine_${request.MedicineId}`] = medicine;
+            } else if (request.FeedId) {
+              const feed = await feedService.getFeedById(request.FeedId);
+              itemDetailsMap[`feed_${request.FeedId}`] = feed;
+            }
+          } catch (err) {
+            // If item details can't be fetched, continue without them
+            console.error("Failed to fetch item details:", err);
+          }
+        })
+      );
+
+      setItemDetails(itemDetailsMap);
+      setRequests(sortedRequests);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load requests");
       setRequests([]);
@@ -64,6 +102,44 @@ export default function SupplierRequests() {
       const currentRequest = requests.find((req) => req.RequestId === requestId);
       if (!currentRequest) {
         throw new Error("Request not found");
+      }
+
+      // Check if request is already approved to prevent double processing
+      if (currentRequest.Status === "Approved") {
+        throw new Error("Request is already approved");
+      }
+
+      // Update inventory quantity based on request type
+      if (currentRequest.MedicineId) {
+        // Get current medicine data
+        const medicine = await medicineService.getMedicineById(currentRequest.MedicineId);
+
+        // Check if there's enough quantity
+        if (medicine.Quantity < currentRequest.Quantity) {
+          throw new Error(`Insufficient medicine quantity. Available: ${medicine.Quantity}, Requested: ${currentRequest.Quantity}`);
+        }
+
+        // Update medicine quantity
+        const updatedMedicine = {
+          ...medicine,
+          Quantity: medicine.Quantity - currentRequest.Quantity,
+        };
+        await medicineService.updateMedicine(currentRequest.MedicineId, updatedMedicine);
+      } else if (currentRequest.FeedId) {
+        // Get current feed data
+        const feed = await feedService.getFeedById(currentRequest.FeedId);
+
+        // Check if there's enough quantity
+        if (feed.Quantity < currentRequest.Quantity) {
+          throw new Error(`Insufficient feed quantity. Available: ${feed.Quantity}, Requested: ${currentRequest.Quantity}`);
+        }
+
+        // Update feed quantity
+        const updatedFeed = {
+          ...feed,
+          Quantity: feed.Quantity - currentRequest.Quantity,
+        };
+        await feedService.updateFeed(currentRequest.FeedId, updatedFeed);
       }
 
       // Update the request with approved status
@@ -180,42 +256,65 @@ export default function SupplierRequests() {
         </div>
       ) : (
         <div className="grid gap-4 sm:gap-6">
-          {requests.map((request) => (
-            <div key={request.RequestId} className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Request #{request.RequestId}</h3>
-                  <p className="text-sm text-gray-600">Type: {request.RequestType}</p>
-                  <p className="text-sm text-gray-600">From User ID: {request.UserId}</p>
-                </div>
-                <div className="text-left sm:text-right">
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${request.Status === "Pending" ? "bg-yellow-100 text-yellow-800" : request.Status === "Approved" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{request.Status}</span>
-                  <p className="text-xs text-gray-500 mt-1">{new Date(request.RequestDate).toLocaleDateString()}</p>
-                </div>
-              </div>
+          {requests.map((request) => {
+            // Get item details for this request
+            const itemKey = request.MedicineId ? `medicine_${request.MedicineId}` : `feed_${request.FeedId}`;
+            const itemDetail = itemDetails[itemKey];
+            const isOutOfStock = itemDetail && itemDetail.Quantity === 0;
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Quantity: {request.Quantity}</p>
-                  {request.MedicineId && <p className="text-sm text-gray-600">Medicine ID: {request.MedicineId}</p>}
-                  {request.FeedId && <p className="text-sm text-gray-600">Feed ID: {request.FeedId}</p>}
-                  {request.LivestockId && <p className="text-sm text-gray-600">Livestock ID: {request.LivestockId}</p>}
+            return (
+              <div key={request.RequestId} className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Request #{request.RequestId}</h3>
+                    <p className="text-sm text-gray-600">Type: {request.RequestType}</p>
+                    <p className="text-sm text-gray-600">From User ID: {request.UserId}</p>
+                    {itemDetail && (
+                      <div className="mt-2">
+                        <p className="text-sm font-medium text-gray-800">{request.RequestType === "Medicine" ? (itemDetail as Medicine).MedicineName : (itemDetail as Feed).FeedName}</p>
+                        <p className="text-xs text-gray-500">
+                          Available: {itemDetail.Quantity} {itemDetail.Unit}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${request.Status === "Pending" ? "bg-yellow-100 text-yellow-800" : request.Status === "Approved" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{request.Status}</span>
+                    <p className="text-xs text-gray-500 mt-1">{new Date(request.RequestDate).toLocaleDateString()}</p>
+                  </div>
                 </div>
-                <div className="flex flex-col sm:block text-left sm:text-right">
-                  {request.Status === "Pending" && request.RequestId && (
-                    <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
-                      <button onClick={() => handleApproveRequest(request.RequestId!)} disabled={processingRequest === request.RequestId} className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm transition duration-200 disabled:opacity-50">
-                        {processingRequest === request.RequestId ? "..." : "✅ Approve"}
-                      </button>
-                      <button onClick={() => handleRejectRequest(request.RequestId!)} disabled={processingRequest === request.RequestId} className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition duration-200 disabled:opacity-50">
-                        {processingRequest === request.RequestId ? "..." : "❌ Reject"}
-                      </button>
-                    </div>
-                  )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Quantity Requested: {request.Quantity}</p>
+                    {request.MedicineId && <p className="text-sm text-gray-600">Medicine ID: {request.MedicineId}</p>}
+                    {request.FeedId && <p className="text-sm text-gray-600">Feed ID: {request.FeedId}</p>}
+                    {request.LivestockId && <p className="text-sm text-gray-600">Livestock ID: {request.LivestockId}</p>}
+                    {itemDetail && (
+                      <p className="text-sm text-gray-600">
+                        Price per Unit: ${itemDetail.PricePerUnit} | Total: ${(request.Quantity * itemDetail.PricePerUnit).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col sm:block text-left sm:text-right">
+                    {request.Status === "Pending" && request.RequestId && (
+                      <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
+                        <button
+                          onClick={() => handleApproveRequest(request.RequestId!)}
+                          disabled={processingRequest === request.RequestId || isOutOfStock || (itemDetail && itemDetail.Quantity < request.Quantity)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                          {processingRequest === request.RequestId ? "..." : isOutOfStock ? "Out of Stock" : itemDetail && itemDetail.Quantity < request.Quantity ? "Insufficient Stock" : "✅ Approve"}
+                        </button>
+                        <button onClick={() => handleRejectRequest(request.RequestId!)} disabled={processingRequest === request.RequestId} className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition duration-200 disabled:opacity-50">
+                          {processingRequest === request.RequestId ? "..." : "❌ Reject"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

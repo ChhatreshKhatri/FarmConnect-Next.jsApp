@@ -71,9 +71,6 @@ const Navbar = () => {
             ) : (
               <>
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-semibold">{username?.charAt(0).toUpperCase() || "U"}</span>
-                  </div>
                   <span className="text-sm">
                     Welcome, <span className="font-semibold">{username}</span>
                   </span>

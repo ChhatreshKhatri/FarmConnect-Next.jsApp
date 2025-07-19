@@ -1,5 +1,5 @@
 export interface User {
-  UserId?: number;
+  UserId?: string;
   Email: string;
   Password: string;
   Username: string;
@@ -22,7 +22,7 @@ export interface Medicine {
   Unit: string;
   PricePerUnit: number;
   Image: string;
-  UserId: number;
+  UserId: string;
 }
 
 export interface Feed {
@@ -34,7 +34,7 @@ export interface Feed {
   Unit: string;
   PricePerUnit: number;
   Image: string;
-  UserId: number;
+  UserId: string;
 }
 
 export interface Livestock {
@@ -46,7 +46,7 @@ export interface Livestock {
   HealthCondition?: string;
   Location: string;
   VaccinationStatus?: string;
-  UserId: number;
+  UserId: string;
 }
 
 export interface Request {
@@ -54,7 +54,7 @@ export interface Request {
   RequestType: string;
   MedicineId?: number | null;
   FeedId?: number | null;
-  UserId: number;
+  UserId: string;
   Quantity: number;
   Status: string;
   LivestockId: number; // This is required according to API
@@ -63,7 +63,7 @@ export interface Request {
 
 export interface Feedback {
   FeedbackId: number;
-  UserId: number;
+  UserId: string;
   FeedbackText: string;
   Date: string;
 }

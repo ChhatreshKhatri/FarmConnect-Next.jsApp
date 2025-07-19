@@ -102,12 +102,21 @@ export default function OwnerMedicine() {
                   </div>
                   <div className="text-sm text-gray-600">
                     Available: {medicine.Quantity} {medicine.Unit}
+                    {medicine.Quantity > 0 && <span className="ml-2 text-green-600">✅ In Stock</span>}
                   </div>
                 </div>
 
-                <Link href={`/owner/request/medicine/${medicine.MedicineId}`} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-200 text-center block">
-                  Request Medicine
-                </Link>
+                {medicine.Quantity > 0 ? (
+                  <Link href={`/owner/request/medicine/${medicine.MedicineId}`} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-200 text-center block">
+                    Request Medicine
+                  </Link>
+                ) : (
+                  <div className="w-full text-center">
+                    <button disabled className="w-full bg-gray-400 text-white py-2 px-4 rounded cursor-not-allowed mb-2">
+                      🚫 Out of Stock
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -10,7 +10,7 @@ export class FeedbackService {
     return apiService.get<Feedback>(`/api/feedback/${id}`);
   }
 
-  async getFeedbackByUserId(userId: number): Promise<Feedback[]> {
+  async getFeedbackByUserId(userId: string): Promise<Feedback[]> {
     try {
       return await apiService.get<Feedback[]>(`/api/feedback/user/${userId}`);
     } catch (error) {

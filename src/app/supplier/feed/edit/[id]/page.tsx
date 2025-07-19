@@ -30,7 +30,7 @@ export default function EditFeed({ params }: EditFeedProps) {
     Unit: "",
     PricePerUnit: 0,
     Image: "",
-    UserId: userId || 0,
+    UserId: userId || "",
   });
 
   // Get the feed ID from params

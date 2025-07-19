@@ -22,7 +22,7 @@ export default function CreateLivestock() {
     HealthCondition: "",
     Location: "",
     VaccinationStatus: "",
-    UserId: userId || 0,
+    UserId: userId || "",
   });
 
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -66,7 +66,7 @@ export default function CreateLivestock() {
         HealthCondition: formData.HealthCondition,
         Location: formData.Location,
         VaccinationStatus: formData.VaccinationStatus,
-        UserId: userId || 0,
+        UserId: userId || "",
       };
       await livestockService.addLivestock(livestockData);
       setSuccess(true);

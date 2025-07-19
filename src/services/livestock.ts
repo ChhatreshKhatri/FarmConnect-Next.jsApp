@@ -10,7 +10,7 @@ export class LivestockService {
     return apiService.get<Livestock>(`/api/livestock/${id}`);
   }
 
-  async getLivestockByUserId(userId: number): Promise<Livestock[]> {
+  async getLivestockByUserId(userId: string): Promise<Livestock[]> {
     return apiService.get<Livestock[]>(`/api/livestock/user/${userId}`);
   }
 
@@ -24,10 +24,6 @@ export class LivestockService {
 
   async deleteLivestock(id: number): Promise<string> {
     return apiService.delete<string>(`/api/livestock/${id}`);
-  }
-
-  async getLivestockRequests(): Promise<Livestock[]> {
-    return apiService.get<Livestock[]>("/api/livestock/requests");
   }
 }
 

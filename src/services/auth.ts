@@ -115,7 +115,7 @@ export class AuthService {
     }
   }
 
-  getUserId(): number | null {
+  getUserId(): string | null {
     const token = this.getToken();
     if (!token) return null;
 
@@ -136,10 +136,8 @@ export class AuthService {
       for (const fieldName of candidateFields) {
         const fieldValue = payload[fieldName];
         if (fieldValue !== undefined && fieldValue !== null && fieldValue !== "") {
-          const numericId = typeof fieldValue === "string" ? parseInt(fieldValue, 10) : fieldValue;
-          if (!isNaN(numericId) && numericId > 0) {
-            return numericId;
-          }
+          // Return the userId as string (GUID format)
+          return typeof fieldValue === "string" ? fieldValue : String(fieldValue);
         }
       }
       return null;

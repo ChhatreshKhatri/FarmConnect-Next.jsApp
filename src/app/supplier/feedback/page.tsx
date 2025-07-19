@@ -99,7 +99,7 @@ export default function SupplierFeedback() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Customer Feedback</h3>
-                  <p className="text-sm text-gray-600">From Customer ID: {feedback.UserId}</p>
+                  <p className="text-sm text-gray-600">From Customer: {feedback.UserId}</p>
                 </div>
                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{new Date(feedback.Date).toLocaleDateString()}</span>
               </div>

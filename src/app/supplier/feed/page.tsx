@@ -9,6 +9,7 @@ import ImageDisplay from "@/components/ImageDisplay";
 
 export default function SupplierFeed() {
   const [feeds, setFeeds] = useState<Feed[]>([]);
+  const [totalSoldData, setTotalSoldData] = useState<{ [key: number]: number }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { userId, userRole, loading: authLoading } = useAuth();
@@ -25,6 +26,23 @@ export default function SupplierFeed() {
       setError("");
       const data = await feedService.getFeedsByUserId(userId);
       setFeeds(data);
+
+      // Load total sold data for each feed
+      const totalSoldPromises = data.map(async (feed) => {
+        if (!feed.FeedId) return { feedId: 0, totalSold: 0 };
+        const totalSold = await feedService.getTotalSoldByFeedId(feed.FeedId);
+        return { feedId: feed.FeedId, totalSold };
+      });
+
+      const totalSoldResults = await Promise.all(totalSoldPromises);
+      const totalSoldMap = totalSoldResults.reduce((acc, { feedId, totalSold }) => {
+        if (feedId > 0) {
+          acc[feedId] = totalSold;
+        }
+        return acc;
+      }, {} as { [key: number]: number });
+
+      setTotalSoldData(totalSoldMap);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load feeds");
       setFeeds([]);
@@ -132,41 +150,133 @@ export default function SupplierFeed() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {feeds.map((feed) => (
-            <div key={feed.FeedId} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <ImageDisplay src={feed.Image} alt={feed.FeedName} className="w-full h-48 object-cover" fallbackText="No feed image" />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feed.FeedName}</h3>
-                <p className="text-gray-600 mb-2">Type: {feed.Type}</p>
-                <p className="text-gray-600 mb-4">{feed.Description}</p>
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feed</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sold</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {feeds.map((feed) => {
+                  const totalSold = totalSoldData[feed.FeedId || 0] || 0;
+                  const isOutOfStock = feed.Quantity === 0;
+                  return (
+                    <tr key={feed.FeedId} className={isOutOfStock ? "bg-red-50" : ""}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <ImageDisplay src={feed.Image} alt={feed.FeedName} className="h-12 w-12 rounded-lg object-cover mr-4" fallbackText="No Image" />
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{feed.FeedName}</div>
+                            <div className="text-sm text-gray-500 max-w-xs truncate">{feed.Description}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{feed.Type}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span className="font-bold text-green-600">${feed.PricePerUnit}</span>
+                        <span className="text-gray-500">/{feed.Unit}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {isOutOfStock ? (
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>
+                        ) : (
+                          <span className="text-gray-900">
+                            {feed.Quantity} {feed.Unit}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {totalSold} {feed.Unit}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <Link href={`/supplier/feed/edit/${feed.FeedId}`} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition duration-200">
+                          Edit
+                        </Link>
+                        {isOutOfStock ? (
+                          <span className="bg-orange-500 text-white px-3 py-1 rounded text-xs">Refill</span>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              /* TODO: Add delete functionality */
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition duration-200">
+                            Delete
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <span className="text-lg font-bold text-green-600">${feed.PricePerUnit}</span>
-                    <span className="text-gray-500 text-sm">/{feed.Unit}</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Stock: {feed.Quantity} {feed.Unit}
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {feeds.map((feed) => {
+              const totalSold = totalSoldData[feed.FeedId || 0] || 0;
+              const isOutOfStock = feed.Quantity === 0;
+              return (
+                <div key={feed.FeedId} className={`bg-white rounded-lg shadow-md overflow-hidden ${isOutOfStock ? "border-l-4 border-red-500" : ""}`}>
+                  <ImageDisplay src={feed.Image} alt={feed.FeedName} className="w-full h-48 object-cover" fallbackText="No feed image" />
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">{feed.FeedName}</h3>
+                      {isOutOfStock && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>}
+                    </div>
+                    <p className="text-gray-600 text-sm mb-2">Type: {feed.Type}</p>
+                    <p className="text-gray-600 text-sm mb-3">{feed.Description}</p>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Price:</span>
+                        <div>
+                          <span className="font-bold text-green-600">${feed.PricePerUnit}</span>
+                          <span className="text-gray-500">/{feed.Unit}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Stock:</span>
+                        <div className="text-gray-900">{isOutOfStock ? "Out of Stock" : `${feed.Quantity} ${feed.Unit}`}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Total Sold:</span>
+                        <div className="text-gray-900">
+                          {totalSold} {feed.Unit}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Link href={`/supplier/feed/edit/${feed.FeedId}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-center text-sm transition duration-200">
+                        Edit
+                      </Link>
+                      {isOutOfStock ? (
+                        <span className="flex-1 bg-orange-500 text-white py-2 px-4 rounded text-center text-sm">Refill</span>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            /* TODO: Add delete functionality */
+                          }}
+                          className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-sm transition duration-200">
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex space-x-2">
-                  <Link href={`/supplier/feed/edit/${feed.FeedId}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-center transition duration-200">
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => {
-                      /* TODO: Add delete functionality */
-                    }}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-200">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );

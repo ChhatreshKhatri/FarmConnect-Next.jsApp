@@ -27,7 +27,7 @@ export default function EditLivestock() {
     HealthCondition: "",
     Location: "",
     VaccinationStatus: "",
-    UserId: 0,
+    UserId: "",
   });
 
   const loadLivestock = useCallback(async () => {

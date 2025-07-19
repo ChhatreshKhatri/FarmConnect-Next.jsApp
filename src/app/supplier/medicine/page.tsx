@@ -13,8 +13,7 @@ export default function SupplierMedicine() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
-
-  console.log("🏥 SupplierMedicine render:", { userId, userRole, authLoading, loading });
+  const [totalSold, setTotalSold] = useState<{ [key: number]: number }>({});
 
   const loadMedicines = useCallback(async () => {
     try {
@@ -23,14 +22,27 @@ export default function SupplierMedicine() {
       if (userId) {
         const data = await medicineService.getMedicinesByUserId(userId);
         setMedicines(data);
+
+        // Fetch total sold for each medicine
+        const soldData: { [key: number]: number } = {};
+        await Promise.all(
+          data.map(async (medicine) => {
+            if (medicine.MedicineId) {
+              try {
+                const sold = await medicineService.getTotalSoldByMedicineId(medicine.MedicineId);
+                soldData[medicine.MedicineId] = sold;
+              } catch {
+                soldData[medicine.MedicineId] = 0;
+              }
+            }
+          })
+        );
+        setTotalSold(soldData);
       } else {
         setMedicines([]);
       }
     } catch (err) {
-      // Only log actual unexpected errors, not empty states
-      console.log("🏥 Issue loading medicines:", err instanceof Error ? err.message : "Unknown error");
       setError(err instanceof Error ? err.message : "Failed to load medicines");
-      // Even if there's an error, we should still show the page with the error message
       setMedicines([]);
     } finally {
       setLoading(false);
@@ -50,9 +62,7 @@ export default function SupplierMedicine() {
   // Emergency fallback - if we're authenticated as Supplier but still loading after auth completes
   useEffect(() => {
     if (!authLoading && userRole === "Supplier" && userId && loading) {
-      console.log("🏥 Emergency fallback: Force showing page after 3 seconds");
       const emergencyTimeout = setTimeout(() => {
-        console.log("🏥 Emergency: Stopping loading and showing empty state");
         setLoading(false);
         setMedicines([]);
       }, 3000);
@@ -124,122 +134,144 @@ export default function SupplierMedicine() {
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Medicines</h1>
-        <Link href="/supplier/medicine/create" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 text-center">
-          Add New Medicine
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">My Medicines</h1>
+        <Link href="/supplier/medicine/create" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+          + Add New Medicine
         </Link>
       </div>
 
-      {error && (
-        <div className="mb-4 sm:mb-6 rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{error}</div>
-        </div>
-      )}
+      {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
 
       {medicines.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No medicines found.</p>
-          <Link href="/supplier/medicine/create" className="mt-4 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200">
+          <div className="text-gray-500 text-lg mb-4">You haven&apos;t added any medicines yet</div>
+          <Link href="/supplier/medicine/create" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200">
             Add Your First Medicine
           </Link>
         </div>
       ) : (
         <>
-          {/* Mobile Card View (visible on small screens) */}
-          <div className="block sm:hidden space-y-4">
-            {medicines.map((medicine, index) => (
-              <div key={medicine.MedicineId} className="bg-white shadow-lg rounded-lg p-4 border">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900">{medicine.MedicineName}</h3>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">#{index + 1}</span>
-                </div>
-
-                <div className="flex mb-3">
-                  <ImageDisplay src={medicine.Image} alt={medicine.MedicineName} className="w-20 h-20 object-cover rounded-lg mr-4" fallbackText="No image" />
-                  <div className="flex-1 grid grid-cols-1 gap-2 text-sm">
-                    <div>
-                      <span className="font-medium text-gray-700">Brand:</span>
-                      <div className="text-gray-900">{medicine.Brand}</div>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">Category:</span>
-                      <div className="text-gray-900">{medicine.Category}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                  <div>
-                    <span className="font-medium text-gray-700">Quantity:</span>
-                    <div className="text-gray-900">{medicine.Quantity}</div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Unit:</span>
-                    <div className="text-gray-900">{medicine.Unit}</div>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="font-medium text-gray-700">Price:</span>
-                    <div className="text-gray-900 text-lg font-semibold">${medicine.PricePerUnit}</div>
-                  </div>
-                </div>
-
-                <div className="flex space-x-2">
-                  <Link href={`/supplier/medicine/edit/${medicine.MedicineId}`} className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-center hover:bg-green-700 transition duration-200 text-sm">
-                    Edit
-                  </Link>
-                  <button onClick={() => setDeleteId(medicine.MedicineId || 0)} className="flex-1 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition duration-200 text-sm">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop Table View (hidden on small screens, visible on sm and up) */}
-          <div className="hidden sm:block bg-white shadow-lg rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-blue-600">
-                  <tr>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">S.No</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Image</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Name</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Brand</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Category</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Quantity</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Unit</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Price</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {medicines.map((medicine, index) => (
-                    <tr key={medicine.MedicineId} className="hover:bg-gray-50">
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <ImageDisplay src={medicine.Image} alt={medicine.MedicineName} className="w-16 h-16 object-cover rounded-lg" fallbackText="No image" />
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medicine</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sold</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {medicines.map((medicine) => {
+                  const totalSoldAmount = totalSold[medicine.MedicineId || 0] || 0;
+                  const isOutOfStock = medicine.Quantity === 0;
+                  return (
+                    <tr key={medicine.MedicineId} className={isOutOfStock ? "bg-red-50" : ""}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <ImageDisplay src={medicine.Image} alt={medicine.MedicineName} className="h-12 w-12 rounded-lg object-cover mr-4" fallbackText="No Image" />
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{medicine.MedicineName}</div>
+                            <div className="text-sm text-gray-500 max-w-xs truncate">{medicine.Description}</div>
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.MedicineName}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.Brand}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.Category}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.Quantity}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.Unit}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">${medicine.PricePerUnit}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        <Link href={`/supplier/medicine/edit/${medicine.MedicineId}`} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.Brand}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.Category}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span className="font-bold text-green-600">${medicine.PricePerUnit}</span>
+                        <span className="text-gray-500">/{medicine.Unit}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {isOutOfStock ? (
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>
+                        ) : (
+                          <span className="text-gray-900">
+                            {medicine.Quantity} {medicine.Unit}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {totalSoldAmount} {medicine.Unit}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <Link href={`/supplier/medicine/edit/${medicine.MedicineId}`} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition duration-200">
                           Edit
                         </Link>
-                        <button onClick={() => setDeleteId(medicine.MedicineId || 0)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition duration-200">
-                          Delete
-                        </button>
+                        {isOutOfStock ? (
+                          <span className="bg-orange-500 text-white px-3 py-1 rounded text-xs">Refill</span>
+                        ) : (
+                          <button onClick={() => setDeleteId(medicine.MedicineId || 0)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition duration-200">
+                            Delete
+                          </button>
+                        )}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {medicines.map((medicine) => {
+              const totalSoldAmount = totalSold[medicine.MedicineId || 0] || 0;
+              const isOutOfStock = medicine.Quantity === 0;
+              return (
+                <div key={medicine.MedicineId} className={`bg-white rounded-lg shadow-md overflow-hidden ${isOutOfStock ? "border-l-4 border-red-500" : ""}`}>
+                  <ImageDisplay src={medicine.Image} alt={medicine.MedicineName} className="w-full h-48 object-cover" fallbackText="No medicine image" />
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">{medicine.MedicineName}</h3>
+                      {isOutOfStock && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>}
+                    </div>
+                    <p className="text-gray-600 text-sm mb-2">Brand: {medicine.Brand}</p>
+                    <p className="text-gray-600 text-sm mb-2">Category: {medicine.Category}</p>
+                    <p className="text-gray-600 text-sm mb-3">{medicine.Description}</p>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Price:</span>
+                        <div>
+                          <span className="font-bold text-green-600">${medicine.PricePerUnit}</span>
+                          <span className="text-gray-500">/{medicine.Unit}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Stock:</span>
+                        <div className="text-gray-900">{isOutOfStock ? "Out of Stock" : `${medicine.Quantity} ${medicine.Unit}`}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Total Sold:</span>
+                        <div className="text-gray-900">
+                          {totalSoldAmount} {medicine.Unit}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Link href={`/supplier/medicine/edit/${medicine.MedicineId}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-center text-sm transition duration-200">
+                        Edit
+                      </Link>
+                      {isOutOfStock ? (
+                        <span className="flex-1 bg-orange-500 text-white py-2 px-4 rounded text-center text-sm">Refill</span>
+                      ) : (
+                        <button onClick={() => setDeleteId(medicine.MedicineId || 0)} className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-sm transition duration-200">
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </>
       )}
