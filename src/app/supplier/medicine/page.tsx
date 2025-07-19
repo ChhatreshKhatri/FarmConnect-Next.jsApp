@@ -134,9 +134,9 @@ export default function SupplierMedicine() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">My Medicines</h1>
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Medicines</h1>
         <Link href="/supplier/medicine/create" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
           + Add New Medicine
         </Link>
@@ -145,135 +145,93 @@ export default function SupplierMedicine() {
       {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
 
       {medicines.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-gray-500 text-lg mb-4">You haven&apos;t added any medicines yet</div>
+        <div className="text-center py-12 bg-white shadow-lg rounded-lg">
+          <div className="text-gray-400 text-6xl mb-4">💊</div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">No Medicines Yet</h2>
+          <p className="text-gray-500 text-lg mb-6">Start adding your medicine products to reach customers.</p>
           <Link href="/supplier/medicine/create" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200">
             Add Your First Medicine
           </Link>
         </div>
       ) : (
-        <>
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medicine</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sold</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {medicines.map((medicine) => {
-                  const totalSoldAmount = totalSold[medicine.MedicineId || 0] || 0;
-                  const isOutOfStock = medicine.Quantity === 0;
-                  return (
-                    <tr key={medicine.MedicineId} className={isOutOfStock ? "bg-red-50" : ""}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <ImageDisplay src={medicine.Image} alt={medicine.MedicineName} className="h-12 w-12 rounded-lg object-cover mr-4" fallbackText="No Image" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{medicine.MedicineName}</div>
-                            <div className="text-sm text-gray-500 max-w-xs truncate">{medicine.Description}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.Brand}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{medicine.Category}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <span className="font-bold text-green-600">${medicine.PricePerUnit}</span>
-                        <span className="text-gray-500">/{medicine.Unit}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        {isOutOfStock ? (
-                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>
-                        ) : (
-                          <span className="text-gray-900">
-                            {medicine.Quantity} {medicine.Unit}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {totalSoldAmount} {medicine.Unit}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        <Link href={`/supplier/medicine/edit/${medicine.MedicineId}`} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition duration-200">
-                          Edit
-                        </Link>
-                        {isOutOfStock ? (
-                          <span className="bg-orange-500 text-white px-3 py-1 rounded text-xs">Refill</span>
-                        ) : (
-                          <button onClick={() => setDeleteId(medicine.MedicineId || 0)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition duration-200">
-                            Delete
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {medicines.map((medicine) => {
+            const totalSoldAmount = totalSold[medicine.MedicineId || 0] || 0;
+            const isOutOfStock = medicine.Quantity === 0;
 
-          {/* Mobile Card View */}
-          <div className="md:hidden space-y-4">
-            {medicines.map((medicine) => {
-              const totalSoldAmount = totalSold[medicine.MedicineId || 0] || 0;
-              const isOutOfStock = medicine.Quantity === 0;
-              return (
-                <div key={medicine.MedicineId} className={`bg-white rounded-lg shadow-md overflow-hidden ${isOutOfStock ? "border-l-4 border-red-500" : ""}`}>
+            return (
+              <div key={medicine.MedicineId} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-4 border-b border-gray-100">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">{medicine.MedicineName}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm font-medium text-blue-600">💊 {medicine.Brand}</span>
+                      </div>
+                    </div>
+                    {isOutOfStock ? <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">Out of Stock</span> : <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">In Stock</span>}
+                  </div>
+                </div>
+
+                {/* Image Section */}
+                <div className="relative">
                   <ImageDisplay src={medicine.Image} alt={medicine.MedicineName} className="w-full h-48 object-cover" fallbackText="No medicine image" />
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{medicine.MedicineName}</h3>
-                      {isOutOfStock && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Out of Stock</span>}
-                    </div>
-                    <p className="text-gray-600 text-sm mb-2">Brand: {medicine.Brand}</p>
-                    <p className="text-gray-600 text-sm mb-2">Category: {medicine.Category}</p>
-                    <p className="text-gray-600 text-sm mb-3">{medicine.Description}</p>
+                </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                      <div>
-                        <span className="text-gray-500">Price:</span>
-                        <div>
-                          <span className="font-bold text-green-600">${medicine.PricePerUnit}</span>
-                          <span className="text-gray-500">/{medicine.Unit}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Stock:</span>
-                        <div className="text-gray-900">{isOutOfStock ? "Out of Stock" : `${medicine.Quantity} ${medicine.Unit}`}</div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Total Sold:</span>
-                        <div className="text-gray-900">
-                          {totalSoldAmount} {medicine.Unit}
-                        </div>
-                      </div>
+                {/* Content Section */}
+                <div className="p-6 space-y-4">
+                  {/* Category Info */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-gray-700">📋 Category:</span>
+                      <span className="text-sm font-semibold text-gray-900">{medicine.Category}</span>
                     </div>
+                    <p className="text-sm text-gray-700">{medicine.Description}</p>
+                  </div>
 
-                    <div className="flex space-x-2">
-                      <Link href={`/supplier/medicine/edit/${medicine.MedicineId}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-center text-sm transition duration-200">
-                        Edit
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-blue-50 rounded-lg p-3 text-center">
+                      <div className="text-lg font-bold text-blue-600">${medicine.PricePerUnit}</div>
+                      <div className="text-xs text-gray-600">per {medicine.Unit}</div>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-3 text-center">
+                      <div className="text-lg font-bold text-purple-600">{totalSoldAmount}</div>
+                      <div className="text-xs text-gray-600">Total Sold</div>
+                    </div>
+                  </div>
+
+                  {/* Stock Info */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Current Stock:</span>
+                      <span className={`text-sm font-medium ${isOutOfStock ? "text-red-600" : "text-gray-900"}`}>
+                        {isOutOfStock ? "0" : medicine.Quantity} {medicine.Unit}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="pt-4 border-t">
+                    <div className="flex gap-2">
+                      <Link href={`/supplier/medicine/edit/${medicine.MedicineId}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                        ✏️ Edit
                       </Link>
                       {isOutOfStock ? (
-                        <span className="flex-1 bg-orange-500 text-white py-2 px-4 rounded text-center text-sm">Refill</span>
+                        <button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">📦 Restock</button>
                       ) : (
-                        <button onClick={() => setDeleteId(medicine.MedicineId || 0)} className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-sm transition duration-200">
-                          Delete
+                        <button onClick={() => setDeleteId(medicine.MedicineId || 0)} className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                          🗑️ Delete
                         </button>
                       )}
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}

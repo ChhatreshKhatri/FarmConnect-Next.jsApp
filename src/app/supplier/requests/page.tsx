@@ -255,7 +255,7 @@ export default function SupplierRequests() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 sm:gap-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {requests.map((request) => {
             // Get item details for this request
             const itemKey = request.MedicineId ? `medicine_${request.MedicineId}` : `feed_${request.FeedId}`;
@@ -263,54 +263,93 @@ export default function SupplierRequests() {
             const isOutOfStock = itemDetail && itemDetail.Quantity === 0;
 
             return (
-              <div key={request.RequestId} className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Request #{request.RequestId}</h3>
-                    <p className="text-sm text-gray-600">Type: {request.RequestType}</p>
-                    <p className="text-sm text-gray-600">From User ID: {request.UserId}</p>
-                    {itemDetail && (
-                      <div className="mt-2">
-                        <p className="text-sm font-medium text-gray-800">{request.RequestType === "Medicine" ? (itemDetail as Medicine).MedicineName : (itemDetail as Feed).FeedName}</p>
-                        <p className="text-xs text-gray-500">
-                          Available: {itemDetail.Quantity} {itemDetail.Unit}
-                        </p>
+              <div key={request.RequestId} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Request #{request.RequestId}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm font-medium text-blue-600">{request.RequestType}</span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-xs text-gray-500">{new Date(request.RequestDate).toLocaleDateString()}</span>
                       </div>
-                    )}
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${request.Status === "Pending" ? "bg-yellow-100 text-yellow-800" : request.Status === "Approved" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{request.Status}</span>
-                    <p className="text-xs text-gray-500 mt-1">{new Date(request.RequestDate).toLocaleDateString()}</p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        request.Status === "Pending" ? "bg-yellow-100 text-yellow-700 border border-yellow-200" : request.Status === "Approved" ? "bg-green-100 text-green-700 border border-green-200" : "bg-red-100 text-red-700 border border-red-200"
+                      }`}>
+                      {request.Status}
+                    </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">Quantity Requested: {request.Quantity}</p>
-                    {request.MedicineId && <p className="text-sm text-gray-600">Medicine ID: {request.MedicineId}</p>}
-                    {request.FeedId && <p className="text-sm text-gray-600">Feed ID: {request.FeedId}</p>}
-                    {request.LivestockId && <p className="text-sm text-gray-600">Livestock ID: {request.LivestockId}</p>}
+                {/* Content Section */}
+                <div className="p-6 space-y-4">
+                  {/* Customer Info */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-gray-700">👤 Customer:</span>
+                      <span className="text-sm font-semibold text-gray-900">{request.User?.UserName || request.User?.Name || "Unknown User"}</span>
+                    </div>
+                    <p className="text-xs text-gray-500">ID: {request.UserId}</p>
+                  </div>
+
+                  {/* Item Details */}
+                  {itemDetail && (
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{request.RequestType === "Medicine" ? "💊" : "🌾"}</span>
+                        <span className="text-sm font-medium text-blue-700">{request.RequestType === "Medicine" ? "Medicine" : "Feed"}</span>
+                      </div>
+                      <p className="text-sm font-semibold text-gray-900 mb-1">{request.RequestType === "Medicine" ? (itemDetail as Medicine).MedicineName : (itemDetail as Feed).FeedName}</p>
+                      {request.Status === "Pending" && (
+                        <p className="text-xs text-green-600 font-medium">
+                          📦 Available: {itemDetail.Quantity} {itemDetail.Unit}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Request Details */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Quantity:</span>
+                      <span className="text-sm font-medium text-gray-900">{request.Quantity}</span>
+                    </div>
                     {itemDetail && (
-                      <p className="text-sm text-gray-600">
-                        Price per Unit: ${itemDetail.PricePerUnit} | Total: ${(request.Quantity * itemDetail.PricePerUnit).toFixed(2)}
-                      </p>
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Price/Unit:</span>
+                          <span className="text-sm font-medium text-gray-900">${itemDetail.PricePerUnit}</span>
+                        </div>
+                        <div className="flex justify-between border-t pt-2">
+                          <span className="text-sm font-medium text-gray-700">Total:</span>
+                          <span className="text-sm font-bold text-green-600">${(request.Quantity * itemDetail.PricePerUnit).toFixed(2)}</span>
+                        </div>
+                      </>
                     )}
                   </div>
-                  <div className="flex flex-col sm:block text-left sm:text-right">
-                    {request.Status === "Pending" && request.RequestId && (
-                      <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
+
+                  {/* Action Buttons */}
+                  {request.Status === "Pending" && request.RequestId && (
+                    <div className="pt-4 border-t">
+                      <div className="flex gap-2">
                         <button
                           onClick={() => handleApproveRequest(request.RequestId!)}
                           disabled={processingRequest === request.RequestId || isOutOfStock || (itemDetail && itemDetail.Quantity < request.Quantity)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                          {processingRequest === request.RequestId ? "..." : isOutOfStock ? "Out of Stock" : itemDetail && itemDetail.Quantity < request.Quantity ? "Insufficient Stock" : "✅ Approve"}
+                          className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 disabled:cursor-not-allowed">
+                          {processingRequest === request.RequestId ? "Processing..." : isOutOfStock ? "Out of Stock" : itemDetail && itemDetail.Quantity < request.Quantity ? "Insufficient Stock" : "✅ Approve"}
                         </button>
-                        <button onClick={() => handleRejectRequest(request.RequestId!)} disabled={processingRequest === request.RequestId} className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition duration-200 disabled:opacity-50">
-                          {processingRequest === request.RequestId ? "..." : "❌ Reject"}
+                        <button
+                          onClick={() => handleRejectRequest(request.RequestId!)}
+                          disabled={processingRequest === request.RequestId}
+                          className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 disabled:cursor-not-allowed">
+                          {processingRequest === request.RequestId ? "Processing..." : "❌ Reject"}
                         </button>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );

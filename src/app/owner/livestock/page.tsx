@@ -118,105 +118,88 @@ export default function OwnerLivestock() {
       )}
 
       {livestock.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No livestock found.</p>
-          <Link href="/owner/livestock/create" className="mt-4 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200">
+        <div className="text-center py-12 bg-white shadow-lg rounded-lg">
+          <div className="text-gray-400 text-6xl mb-4">🐄</div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">No Livestock Yet</h2>
+          <p className="text-gray-500 text-lg mb-6">Start managing your livestock by adding your first animal.</p>
+          <Link href="/owner/livestock/create" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200">
             Add Your First Livestock
           </Link>
         </div>
       ) : (
-        <>
-          {/* Mobile Card View (visible on small screens) */}
-          <div className="block sm:hidden space-y-4">
-            {livestock.map((animal, index) => (
-              <div key={animal.LivestockId} className="bg-white shadow-lg rounded-lg p-4 border">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900">{animal.Name}</h3>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">#{index + 1}</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {livestock.map((animal, index) => (
+            <div key={animal.LivestockId} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+              {/* Header Section */}
+              <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-4 border-b border-gray-100">
+                <div className="flex justify-between items-start">
                   <div>
-                    <span className="font-medium text-gray-700">Species:</span>
-                    <div className="text-gray-900">{animal.Species}</div>
+                    <h3 className="text-lg font-bold text-gray-900">{animal.Name}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm font-medium text-orange-600"> {animal.Species}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Age:</span>
-                    <div className="text-gray-900">{animal.Age}</div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Breed:</span>
-                    <div className="text-gray-900">{animal.Breed}</div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Health:</span>
-                    <div className="text-gray-900">{animal.HealthCondition}</div>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="font-medium text-gray-700">Location:</span>
-                    <div className="text-gray-900">{animal.Location}</div>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="font-medium text-gray-700">Vaccination:</span>
-                    <div className="text-gray-900">{animal.VaccinationStatus}</div>
-                  </div>
-                </div>
-
-                <div className="flex space-x-2 mt-4">
-                  <Link href={`/owner/livestock/edit/${animal.LivestockId}`} className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-center hover:bg-green-700 transition duration-200 text-sm">
-                    Edit
-                  </Link>
-                  <button onClick={() => setDeleteId(animal.LivestockId)} className="flex-1 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition duration-200 text-sm">
-                    Delete
-                  </button>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">#{index + 1}</span>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Desktop Table View (hidden on small screens, visible on sm and up) */}
-          <div className="hidden sm:block bg-white shadow-lg rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-blue-600">
-                  <tr>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">S.No</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Name</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Species</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Age</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Breed</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Health</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Location</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Vaccination</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {livestock.map((animal, index) => (
-                    <tr key={animal.LivestockId} className="hover:bg-gray-50">
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{animal.Name}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{animal.Species}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{animal.Age}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{animal.Breed}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{animal.HealthCondition}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{animal.Location}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{animal.VaccinationStatus}</td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        <Link href={`/owner/livestock/edit/${animal.LivestockId}`} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition duration-200">
-                          Edit
-                        </Link>
-                        <button onClick={() => setDeleteId(animal.LivestockId)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition duration-200">
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* Content Section */}
+              <div className="p-6 space-y-4">
+                {/* Basic Info */}
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">Breed:</span>
+                      <div className="font-medium text-gray-900">{animal.Breed}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Age:</span>
+                      <div className="font-medium text-gray-900">{animal.Age}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Health Info */}
+                <div className="bg-green-50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">🏥</span>
+                    <span className="text-sm font-medium text-green-700">Health Information</span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Condition:</span>
+                      <span className="font-medium text-gray-900">{animal.HealthCondition}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Vaccination:</span>
+                      <span className="font-medium text-gray-900">{animal.VaccinationStatus}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Location Info */}
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">📍 Location:</span>
+                    <span className="text-sm font-medium text-gray-900">{animal.Location}</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-4 border-t">
+                  <div className="flex gap-2">
+                    <Link href={`/owner/livestock/edit/${animal.LivestockId}`} className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 text-center">
+                      ✏️ Edit
+                    </Link>
+                    <button onClick={() => setDeleteId(animal.LivestockId)} className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </>
+          ))}
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}

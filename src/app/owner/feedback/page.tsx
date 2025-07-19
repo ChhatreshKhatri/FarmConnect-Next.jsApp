@@ -100,46 +100,75 @@ export default function OwnerFeedback() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-4 sm:gap-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {feedbacks.map((feedback) => (
-            <div key={feedback.FeedbackId} className="bg-white rounded-lg shadow-md p-4 sm:p-6 border">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
-                <div className="flex items-start space-x-3">
-                  <div className="bg-blue-100 rounded-full p-2 mt-1">
-                    <span className="text-blue-600 text-sm font-semibold">👤</span>
-                  </div>
+            <div key={feedback.FeedbackId} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+              {/* Header Section */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-100">
+                <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">
-                      User #{feedback.UserId}
-                      {feedback.UserId === userId && <span className="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">You</span>}
-                    </h3>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(feedback.Date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
+                    <h3 className="text-lg font-bold text-gray-900">{feedback.User?.UserName || feedback.User?.Name || "Anonymous User"}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm font-medium text-green-600">💬 Feedback</span>
+                      {feedback.UserId === userId && <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">You</span>}
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">#{feedback.FeedbackId}</span>
+                </div>
+              </div>
+
+              {/* Content Section */}
+              <div className="p-6 space-y-4">
+                {/* User Info */}
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">👤</span>
+                    <span className="text-sm font-medium text-gray-700">User Details</span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">User ID:</span>
+                      <span className="font-medium text-gray-900">{feedback.UserId}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Date:</span>
+                      <span className="font-medium text-gray-900">{new Date(feedback.Date).toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="text-left sm:text-right">
-                  <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Feedback #{feedback.FeedbackId}</span>
-                </div>
-              </div>
 
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{feedback.FeedbackText}</p>
-              </div>
-
-              {feedback.UserId === userId && (
-                <div className="mt-4 flex justify-end">
-                  <Link href="/owner/feedback/my" className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
-                    ✏️ Manage My Feedback
-                  </Link>
+                {/* Feedback Content */}
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">📝</span>
+                    <span className="text-sm font-medium text-gray-700">Feedback Message</span>
+                  </div>
+                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{feedback.FeedbackText}</p>
                 </div>
-              )}
+
+                {/* Timestamp */}
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 bg-gray-50 rounded-lg py-2 px-3">
+                    📅{" "}
+                    {new Date(feedback.Date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                </div>
+
+                {/* Action Button for Own Feedback */}
+                {feedback.UserId === userId && (
+                  <div className="pt-4 border-t">
+                    <Link href="/owner/feedback/my" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition duration-200 text-center block font-medium">
+                      ✏️ Manage My Feedback
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

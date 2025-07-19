@@ -26,17 +26,17 @@ const Navbar = () => {
   // Don't render until mounted to prevent hydration issues
   if (!mounted) {
     return (
-      <nav className="bg-blue-600 text-white shadow-lg">
+      <nav className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg border-b border-blue-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link href="/" className="flex items-center space-x-2 text-xl font-bold">
+              <Link href="/" className="flex items-center space-x-3 text-xl font-bold hover:text-blue-200 transition-colors">
                 <Image src="https://cdn.chhatreshkhatri.com/icons/FarmConnect.svg" alt="FarmConnect" width={32} height={32} className="w-8 h-8" />
                 <span>FarmConnect</span>
               </Link>
             </div>
             <div className="flex items-center">
-              <div className="animate-pulse bg-blue-500 h-8 w-20 rounded"></div>
+              <div className="animate-pulse bg-blue-500 h-8 w-20 rounded-lg"></div>
             </div>
           </div>
         </div>
@@ -45,76 +45,84 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="bg-blue-600 text-white shadow-lg">
-      {" "}
+    <nav className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg border-b border-blue-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2 text-xl font-bold">
-              <Image src="https://cdn.chhatreshkhatri.com/icons/FarmConnect.svg" alt="FarmConnect" width={32} height={32} className="w-8 h-8" />
+            <Link href="/" className="flex items-center space-x-3 text-xl font-bold hover:text-blue-200 transition-colors group">
+              <Image src="https://cdn.chhatreshkhatri.com/icons/FarmConnect.svg" alt="FarmConnect" width={32} height={32} className="w-8 h-8 group-hover:scale-110 transition-transform" />
               <span>FarmConnect</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-1">
             {!isAuthenticated ? (
               <>
-                <div className="text-sm text-yellow-200 mr-4">Please login to access features</div>
-                <Link href="/login" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                  Login
+                <div className="text-sm text-blue-200 mr-3 px-3 py-2 bg-blue-800/50 rounded-lg">🔐 Please login to access features</div>
+                <Link href="/login" className="hover:bg-blue-800 px-3 py-2 rounded-lg transition-all duration-200 font-medium">
+                  🔑 Login
                 </Link>
-                <Link href="/register" className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded transition duration-200">
-                  Register
+                <Link href="/register" className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl">
+                  ✨ Register
                 </Link>
               </>
             ) : (
               <>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm">
-                    Welcome, <span className="font-semibold">{username}</span>
-                  </span>
-                  <span className="text-xs bg-blue-800 px-2 py-1 rounded-full">{userRole}</span>
+                <div className="flex items-center space-x-2 bg-blue-800/50 p-2 rounded-lg mr-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-medium text-white">{username}</span>
+                    <span className="text-xs bg-blue-700 px-2 py-1 rounded-full text-blue-200">{userRole}</span>
+                  </div>
                 </div>
 
                 {userRole === "Supplier" && (
                   <>
-                    <Link href="/supplier/medicine" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      💊 Medicines
+                    <Link href="/supplier/medicine" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>💊</span>
+                      <span>Medicines</span>
                     </Link>
-                    <Link href="/supplier/feed" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      🌾 Feeds
+                    <Link href="/supplier/feed" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>🌾</span>
+                      <span>Feeds</span>
                     </Link>
-                    <Link href="/supplier/requests" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      📋 Requests
+                    <Link href="/supplier/requests" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>📋</span>
+                      <span>Requests</span>
                     </Link>
-                    <Link href="/supplier/feedback" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      💬 Feedback
+                    <Link href="/supplier/feedback" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>💬</span>
+                      <span>Feedback</span>
                     </Link>
                   </>
                 )}
 
                 {userRole === "Owner" && (
                   <>
-                    <Link href="/owner/livestock" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      🐄 Livestock
+                    <Link href="/owner/livestock" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>🐄</span>
+                      <span>Livestock</span>
                     </Link>
-                    <Link href="/owner/medicine" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      💊 Medicine
+                    <Link href="/owner/medicine" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>💊</span>
+                      <span>Medicine</span>
                     </Link>
-                    <Link href="/owner/feed" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      🌾 Feed
+                    <Link href="/owner/feed" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>🌾</span>
+                      <span>Feed</span>
                     </Link>
-                    <Link href="/owner/requests" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      📋 Requests
+                    <Link href="/owner/requests" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>📋</span>
+                      <span>Requests</span>
                     </Link>
-                    <Link href="/owner/feedback" className="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
-                      💬 Feedback
+                    <Link href="/owner/feedback" className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                      <span>💬</span>
+                      <span>Feedback</span>
                     </Link>
                   </>
                 )}
 
-                <button onClick={handleLogout} className="hover:bg-red-700 bg-red-600 px-3 py-2 rounded transition duration-200 flex items-center space-x-1">
+                <button onClick={handleLogout} className="hover:bg-red-700 bg-red-600 px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 font-medium shadow-lg hover:shadow-xl text-sm">
                   <span>🚪</span>
                   <span>Logout</span>
                 </button>
@@ -123,10 +131,10 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)} className="hover:bg-blue-700 p-2 rounded">
+          <div className="lg:hidden flex items-center">
+            <button onClick={() => setIsOpen(!isOpen)} className="hover:bg-blue-800 p-2 rounded-lg transition-all duration-200">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                {isOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
               </svg>
             </button>
           </div>
@@ -134,60 +142,76 @@ const Navbar = () => {
 
         {/* Mobile menu */}
         {isOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <div className="lg:hidden border-t border-blue-500">
+            <div className="px-2 pt-4 pb-3 space-y-2">
               {!isAuthenticated ? (
-                <>
-                  <Link href="/login" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                    Login
+                <div className="flex flex-col space-y-2">
+                  <div className="text-sm text-blue-200 mr-3 px-3 py-2 bg-blue-800/50 rounded-lg">🔐 Please login to access features</div>
+                  <Link href="/login" className="hover:bg-blue-800 px-3 py-2 rounded-lg transition-all duration-200 font-medium">
+                    🔑 Login
                   </Link>
-                  <Link href="/register" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                    Register
+                  <Link href="/register" className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl">
+                    ✨ Register
                   </Link>
-                </>
+                </div>
               ) : (
                 <>
-                  <div className="px-3 py-2 text-sm">Welcome, {username}</div>
+                  <div className="px-4 py-3 bg-blue-700/50 rounded-lg mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-sm font-semibold text-white">{username}</div>
+                      <div className="text-xs bg-blue-600 px-2 py-1 rounded-full text-blue-200 inline-block">{userRole}</div>
+                    </div>
+                  </div>
 
                   {userRole === "Supplier" && (
                     <>
-                      <Link href="/supplier/medicine" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        My Medicines
+                      <Link href="/supplier/medicine" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>💊</span>
+                        <span>My Medicines</span>
                       </Link>
-                      <Link href="/supplier/feed" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        My Feeds
+                      <Link href="/supplier/feed" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>🌾</span>
+                        <span>My Feeds</span>
                       </Link>
-                      <Link href="/supplier/requests" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        Requests
+                      <Link href="/supplier/requests" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>📋</span>
+                        <span>Requests</span>
                       </Link>
-                      <Link href="/supplier/feedback" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        View Feedback
+                      <Link href="/supplier/feedback" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>💬</span>
+                        <span>View Feedback</span>
                       </Link>
                     </>
                   )}
 
                   {userRole === "Owner" && (
                     <>
-                      <Link href="/owner/livestock" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        My Livestock
+                      <Link href="/owner/livestock" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>🐄</span>
+                        <span>My Livestock</span>
                       </Link>
-                      <Link href="/owner/medicine" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        Browse Medicine
+                      <Link href="/owner/medicine" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>💊</span>
+                        <span>Browse Medicine</span>
                       </Link>
-                      <Link href="/owner/feed" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        Browse Feed
+                      <Link href="/owner/feed" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>🌾</span>
+                        <span>Browse Feed</span>
                       </Link>
-                      <Link href="/owner/requests" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        My Requests
+                      <Link href="/owner/requests" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>📋</span>
+                        <span>My Requests</span>
                       </Link>
-                      <Link href="/owner/feedback" className="block hover:bg-blue-700 px-3 py-2 rounded">
-                        Feedback
+                      <Link href="/owner/feedback" className="hover:bg-blue-700 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <span>💬</span>
+                        <span>Feedback</span>
                       </Link>
                     </>
                   )}
 
-                  <button onClick={handleLogout} className="block w-full text-left hover:bg-red-700 bg-red-600 px-3 py-2 rounded">
-                    Logout
+                  <button onClick={handleLogout} className="w-full hover:bg-red-700 bg-red-600 px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 font-medium mt-4">
+                    <span>🚪</span>
+                    <span>Logout</span>
                   </button>
                 </>
               )}

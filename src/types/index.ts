@@ -7,6 +7,25 @@ export interface User {
   UserRole: string;
 }
 
+export interface UserInfo {
+  Name: string;
+  Id: string;
+  UserName: string;
+  NormalizedUserName: string;
+  Email: string;
+  NormalizedEmail: string;
+  EmailConfirmed: boolean;
+  PasswordHash: string;
+  SecurityStamp: string;
+  ConcurrencyStamp: string;
+  PhoneNumber: string;
+  PhoneNumberConfirmed: boolean;
+  TwoFactorEnabled: boolean;
+  LockoutEnd: string | null;
+  LockoutEnabled: boolean;
+  AccessFailedCount: number;
+}
+
 export interface LoginRequest {
   Email: string;
   Password: string;
@@ -23,6 +42,7 @@ export interface Medicine {
   PricePerUnit: number;
   Image: string;
   UserId: string;
+  User?: UserInfo;
 }
 
 export interface Feed {
@@ -35,6 +55,7 @@ export interface Feed {
   PricePerUnit: number;
   Image: string;
   UserId: string;
+  User?: UserInfo;
 }
 
 export interface Livestock {
@@ -47,6 +68,7 @@ export interface Livestock {
   Location: string;
   VaccinationStatus?: string;
   UserId: string;
+  User?: UserInfo;
 }
 
 export interface Request {
@@ -59,11 +81,13 @@ export interface Request {
   Status: string;
   LivestockId: number; // This is required according to API
   RequestDate: string;
+  User?: UserInfo;
 }
 
 export interface Feedback {
   FeedbackId: number;
   UserId: string;
+  User?: UserInfo;
   FeedbackText: string;
   Date: string;
 }
